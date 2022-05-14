@@ -1,14 +1,34 @@
-import javax.swing.JFrame;
+import javax.swing.*;
+import java.awt.event.*;
 
-public class GameFrame extends JFrame {
-  
+public class GameFrame extends JFrame implements ActionListener {
+  GamePanel game;
+  JButton resetButton;
+
   GameFrame() {
-    this.add(new GamePanel());
-    this.setTitle("JavaSnake");
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    this.setResizable(false);
-    this.pack();
+    this.setSize(400, 300);
+    this.setLayout(null);
+    resetButton = new JButton("Reset");
+    resetButton.setSize(100, 50);
+    resetButton.setLocation(0, 0);
+    resetButton.addActionListener(this);
+
+    game = new GamePanel();
+
+    this.add(resetButton);
+    this.add(game);
+
     this.setVisible(true);
-    this.setLocationRelativeTo(null);
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    if (e.getSource() == resetButton) {
+      this.remove(game);
+      game = new GamePanel();
+      this.add(game);
+      SwingUtilities.updateComponentTreeUI(this);
+    }
   }
 }

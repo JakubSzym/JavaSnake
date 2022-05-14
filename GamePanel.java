@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-
 import javax.swing.*;
 import java.util.Random;
 
@@ -19,17 +18,61 @@ public class GamePanel extends JPanel implements ActionListener {
   int eatenFruits;
   int xFruit;
   int yFruit;
-  Direction direction = Direction.RIGHT;
   boolean isRunning = false;
   Timer timer;
   Random random;
+  Direction direction = Direction.RIGHT;
+
+  Action turnUpAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (direction != Direction.DOWN) {
+        direction = Direction.UP;
+      }
+    }
+  };
+
+  Action turnDownAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (direction != Direction.UP) {
+        direction = Direction.DOWN;
+      }
+    }
+  };
+
+  Action turnLeftAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (direction != Direction.RIGHT) {
+        direction = Direction.LEFT;
+      }
+    }
+  };
+
+  Action turnRightAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (direction != Direction.LEFT) {
+        direction = Direction.RIGHT;
+      }
+    }
+  };
 
   GamePanel() {
     random = new Random();
-    this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+    this.setSize(WIDTH, HEIGHT);
+    this.setLocation(100,0);
     this.setBackground(Color.DARK_GRAY);
     this.setFocusable(true);
-    this.addKeyListener(new GameKeyAdapter());
+    this.requestFocusInWindow(true);
+
+    this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "turnUp");
+    this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "turnDown");
+    this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "turnLeft");
+    this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "turnRight");
+
+    this.getActionMap().put("turnUp", turnUpAction);
+    this.getActionMap().put("turnDown", turnDownAction);
+    this.getActionMap().put("turnLeft", turnLeftAction);
+    this.getActionMap().put("turnRight",turnRightAction);
+
     start();
   }
 
@@ -75,7 +118,7 @@ public class GamePanel extends JPanel implements ActionListener {
       gameOver(g);
     }
   }
-
+  
   public void move() {
     for (int i = segments; i > 0; i--) {
       xCoord[i] = xCoord[i - 1];
@@ -102,6 +145,7 @@ public class GamePanel extends JPanel implements ActionListener {
     xFruit = random.nextInt((int)(WIDTH / UNIT_SIZE)) * UNIT_SIZE;
     yFruit = random.nextInt((int)(HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
   }
+  
   public void checkFruit() {
     if (xCoord[0] == xFruit && yCoord[0] == yFruit) {
       segments++;
@@ -127,6 +171,7 @@ public class GamePanel extends JPanel implements ActionListener {
   }
 
   public void gameOver(Graphics g) {
+    this.setFocusable(false);
     g.setColor(Color.red);
 
     g.setFont(new Font("Arial", Font.BOLD, 10));
@@ -142,7 +187,6 @@ public class GamePanel extends JPanel implements ActionListener {
                  HEIGHT/2);
   }
 
-
   @Override
   public void actionPerformed(ActionEvent e) {
     if (isRunning) {
@@ -151,37 +195,5 @@ public class GamePanel extends JPanel implements ActionListener {
       checkCollisions();
     }
     repaint();
-  }
-
-  public class GameKeyAdapter extends KeyAdapter {
-    @Override
-    public void keyPressed(KeyEvent e) {
-      switch (e.getKeyCode()) {
-        case KeyEvent.VK_LEFT:
-          if (direction != Direction.RIGHT) {
-            direction = Direction.LEFT;
-          }
-          break;
-        case KeyEvent.VK_RIGHT:
-          if (direction != Direction.LEFT) {
-            direction = Direction.RIGHT;
-          }
-          break;
-        case KeyEvent.VK_UP:
-          if (direction != Direction.DOWN) {
-            direction = Direction.UP;
-          }
-          break;
-        case KeyEvent.VK_DOWN:
-          if (direction != Direction.UP) {
-            direction = Direction.DOWN;
-          }
-          break;
-      }
-    }
-  }
-
-  public enum Direction {
-    UP, DOWN, RIGHT, LEFT;
   }
 }
