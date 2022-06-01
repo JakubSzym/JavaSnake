@@ -1,23 +1,27 @@
+import java.util.ArrayList;
 import java.awt.*;
+import java.awt.Graphics;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.Random;
 
-public class GamePanel extends JPanel implements ActionListener {
+
+public class GamePanel extends JPanel implements ActionListener, Runnable{
 
   static final int WIDTH = 300;
   static final int HEIGHT = 300;
   static final int UNIT_SIZE = 10;
   static final int GAME_UNITS = (WIDTH * HEIGHT) / UNIT_SIZE;
   static final int DELAY = 75;
+  private Thread animator;
 
   final int xCoord[] = new int[GAME_UNITS];
   final int yCoord[] = new int[GAME_UNITS];
 
   int segments = 6;
   int eatenFruits;
-  int xFruit;
-  int yFruit;
+  java.util.List<Integer> xFruit = new ArrayList<Integer>();
+  java.util.List<Integer> yFruit = new ArrayList<Integer>();
   boolean isRunning = false;
   Timer timer;
   Random random;
@@ -56,6 +60,7 @@ public class GamePanel extends JPanel implements ActionListener {
   };
 
   GamePanel() {
+
     random = new Random();
     this.setSize(WIDTH, HEIGHT);
     this.setLocation(100,0);
@@ -76,8 +81,33 @@ public class GamePanel extends JPanel implements ActionListener {
     start();
   }
 
+  @Override
+  public void addNotify() {
+      super.addNotify();
+      animator = new Thread(this);
+      animator.start();
+  }
+
+
+  @Override
+  public void run() {
+    System.out.println("New thread is running");
+    while (true){
+    synchronized(xFruit){
+    xFruit.add(random.nextInt((int)(WIDTH / UNIT_SIZE)) * UNIT_SIZE);
+    }
+    synchronized(yFruit){
+    yFruit.add(random.nextInt((int)(HEIGHT / UNIT_SIZE)) * UNIT_SIZE);
+    }
+    try { 
+      long numMillisecondsToSleep = 5000; // 10 seconds 
+      Thread.sleep(numMillisecondsToSleep); 
+ } catch (InterruptedException e) { } 
+    }
+  }
+
+
   public void start() {
-    putFruit();
     isRunning = true;
     timer = new Timer(DELAY, this);
     timer.start();
@@ -95,7 +125,15 @@ public class GamePanel extends JPanel implements ActionListener {
         g.drawLine(0, i * UNIT_SIZE, WIDTH, i * UNIT_SIZE);
       }
       g.setColor(Color.red);
-      g.fillOval(xFruit, yFruit, UNIT_SIZE, UNIT_SIZE);
+
+      synchronized(xFruit){
+        synchronized(yFruit){
+      for(int i = 0; i < xFruit.size(); i++)
+      {
+        g.fillOval(xFruit.get(i), yFruit.get(i), UNIT_SIZE, UNIT_SIZE);
+      }
+    }
+    }
 
       for (int i = 0; i < segments; i++) {
         if (i == 0) {
@@ -141,18 +179,27 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
-  public void putFruit() {
-    xFruit = random.nextInt((int)(WIDTH / UNIT_SIZE)) * UNIT_SIZE;
-    yFruit = random.nextInt((int)(HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
-  }
+  // public void putFruit() {
+  //   xFruit = random.nextInt((int)(WIDTH / UNIT_SIZE)) * UNIT_SIZE;
+  //   yFruit = random.nextInt((int)(HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+  // }
   
   public void checkFruit() {
-    if (xCoord[0] == xFruit && yCoord[0] == yFruit) {
-      segments++;
-      eatenFruits++;
-      putFruit();
-    }
-  }
+    synchronized(xFruit){
+      synchronized(yFruit){
+    for (Integer cooridnates_x : xFruit) {
+      for (Integer coordinates_y : yFruit){
+        if (xCoord[0] == cooridnates_x && yCoord[0] == coordinates_y){
+          segments++;
+          eatenFruits++;
+          xFruit.remove(cooridnates_x);
+          yFruit.remove(coordinates_y);
+        }
+      }
+      }}
+}}
+  
+
 
   public void checkCollisions() {
     for (int i = segments; i > 0; i--) {
