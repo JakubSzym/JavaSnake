@@ -16,7 +16,7 @@ public class GamePanel extends JPanel implements ActionListener {
   static final int ELEMENTS = 5;
   static final int OBSTACLES_NUM = 8;
   static final int GAME_UNITS = (WIDTH * HEIGHT) / UNIT_SIZE;
-  static final int DELAY = 20;
+  static final int DELAY = 65;
   static final String DATAFILE = "record.dat";
 
   final int xCoord[] = new int[GAME_UNITS];
@@ -24,13 +24,14 @@ public class GamePanel extends JPanel implements ActionListener {
   final int aiXCoord[] = new int[GAME_UNITS];
   final int aiYCoord[] = new int[GAME_UNITS];
 
+  final int xFruits[] = new int[ELEMENTS];
+  final int yFruits[] = new int[ELEMENTS];
+
   int segments = 6;
   int aiSegments = 6;
   int eatenFruits;
   int aiEatenFruits;
   int record;
-  int xFruit;
-  int yFruit;
   int xFrog;
   int yFrog;
   int[][] obstaclesX;
@@ -112,6 +113,11 @@ public class GamePanel extends JPanel implements ActionListener {
       aiYCoord[i] = HEIGHT;
     }
 
+    for (int i = 0; i < ELEMENTS; i++) {
+      xFruits[i] = -1;
+      yFruits[i] = -1;
+    }
+
     start();
   }
 
@@ -146,7 +152,9 @@ public class GamePanel extends JPanel implements ActionListener {
       //
 
       g.setColor(Color.red);
-      g.fillOval(xFruit, yFruit, UNIT_SIZE, UNIT_SIZE);
+      for (int i = 0; i < ELEMENTS; i++) {
+        g.fillOval(xFruits[i], yFruits[i], UNIT_SIZE, UNIT_SIZE);
+      }
 
       //
       // Snake
@@ -389,23 +397,6 @@ public class GamePanel extends JPanel implements ActionListener {
   }
 
   public void aiMove() {
-    for (int i = 0; i < aiSegments; i++) {
-      if (aiXCoord[0] == aiXCoord[i] - 1 && aiYCoord[0] == aiYCoord[i] && aiDirection == Direction.RIGHT) {
-        aiDirection = Direction.DOWN;
-      }
-
-      if (aiXCoord[0] == aiXCoord[i] + 1 && aiYCoord[0] == aiYCoord[i] && aiDirection == Direction.LEFT) {
-        aiDirection = Direction.UP;
-      }
-
-      if (aiXCoord[0] == aiXCoord[i] && aiYCoord[0] == aiYCoord[i] - 1 && aiDirection == Direction.UP) {
-        aiDirection = Direction.RIGHT;
-      }
-
-      if (aiXCoord[0] == aiXCoord[i] && aiYCoord[0] == aiYCoord[i] + 1 && aiDirection == Direction.DOWN) {
-        aiDirection = Direction.LEFT;
-      }
-    }
 
     if (aiXCoord[0] == WIDTH - UNIT_SIZE && aiYCoord[0] == 0) {
       switch (aiDirection) {
@@ -484,20 +475,24 @@ public class GamePanel extends JPanel implements ActionListener {
       }
     }
 
-    if (aiXCoord[0] == xFruit) {
-      if (aiYCoord[0] > yFruit && aiDirection != Direction.DOWN) {
+    int index = closestFruitIndex();
+    int xClosestFruit = xFruits[index];
+    int yClosestFruit = yFruits[index];
+
+    if (aiXCoord[0] == xClosestFruit) {
+      if (aiYCoord[0] > yClosestFruit && aiDirection != Direction.DOWN) {
         aiDirection = Direction.UP;
       } 
-      if (aiYCoord[0] < yFruit && aiDirection != Direction.UP) {
+      if (aiYCoord[0] < yClosestFruit && aiDirection != Direction.UP) {
         aiDirection = Direction.DOWN;
       }
     }
 
-    if (aiYCoord[0] == yFruit) {
-      if (aiXCoord[0] < xFruit && aiDirection != Direction.LEFT) {
+    if (aiYCoord[0] == yClosestFruit) {
+      if (aiXCoord[0] < xClosestFruit && aiDirection != Direction.LEFT) {
         aiDirection = Direction.RIGHT;
       } 
-      if (aiXCoord[0] > xFruit && aiDirection != Direction.RIGHT) {
+      if (aiXCoord[0] > xClosestFruit && aiDirection != Direction.RIGHT) {
         aiDirection = Direction.LEFT;
       }
     }
@@ -569,14 +564,18 @@ public class GamePanel extends JPanel implements ActionListener {
   }
 
   public void putFruit() {
-    xFruit = random.nextInt((int) (WIDTH / UNIT_SIZE)) * UNIT_SIZE;
-    yFruit = random.nextInt((int) (HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+    for (int i = 0; i < ELEMENTS; i++) {
 
-    for (int i = 0; i < OBSTACLES_NUM; i++)
-    {
-      for (int j = 0; j < ELEMENTS; j++) {
-        if (xFruit == obstaclesX[i][j] && yFruit == obstaclesY[i][j]) {
-          putFruit();
+      if (xFruits[i] == -1) xFruits[i] = random.nextInt((int) (WIDTH / UNIT_SIZE)) * UNIT_SIZE;
+      if (yFruits[i] == -1) yFruits[i] = random.nextInt((int) (HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+
+      for (int j = 0; j < OBSTACLES_NUM; j++)
+      {
+        for (int k = 0; k < ELEMENTS; k++) {
+          if (xFruits[i] == obstaclesX[j][k] && yFruits[i] == obstaclesY[j][k]) {
+           xFruits[i] = -1;
+           yFruits[i] = -1;
+          }
         }
       }
     }    
@@ -603,38 +602,46 @@ public class GamePanel extends JPanel implements ActionListener {
   }
 
   public void checkFruit() {
-    if (xCoord[0] == xFruit && yCoord[0] == yFruit) {
-      segments++;
-      eatenFruits++;
-      int newFrogDirection = random.nextInt(2);
-      switch (newFrogDirection) {
-        case 0:
-          if (frogDirection == Direction.UP) {
-            frogDirection = Direction.RIGHT;
-          }
-          if (frogDirection == Direction.RIGHT) {
-            frogDirection = Direction.DOWN;
-          }
-          break;
-        case 1:
-          if (frogDirection == Direction.DOWN) {
-            frogDirection = Direction.LEFT;
-          }
-          if (frogDirection == Direction.LEFT) {
-            frogDirection = Direction.UP;
-          }
-          break;
+    for (int i = 0; i < ELEMENTS; i++) {
+      if (xCoord[0] == xFruits[i] && yCoord[0] == yFruits[i]) {
+        segments++;
+        eatenFruits++;
+        xFruits[i] = -1;
+        yFruits[i] = -1;
+        int newFrogDirection = random.nextInt(2);
+        switch (newFrogDirection) {
+          case 0:
+            if (frogDirection == Direction.UP) {
+              frogDirection = Direction.RIGHT;
+            }
+            if ( frogDirection == Direction.RIGHT) {
+              frogDirection = Direction.DOWN;
+            }
+            break;
+          case 1:
+            if (frogDirection == Direction.DOWN) {
+              frogDirection = Direction.LEFT;
+            }
+            if (frogDirection == Direction.LEFT) {
+              frogDirection = Direction.UP;
+            }
+            break;
+        }
+        
+        putFruit();
       }
-
-      putFruit();
     }
   }
 
   public void aiCheckFruit() {
-    if (aiXCoord[0] == xFruit && aiYCoord[0] == yFruit) {
-      aiSegments++;
-      aiEatenFruits++;
-      putFruit();
+    for (int i = 0; i < ELEMENTS; i++) {
+      if (aiXCoord[0] == xFruits[i] && aiYCoord[0] == yFruits[i]) {
+        aiSegments++;
+        aiEatenFruits++;
+        xFruits[i] = -1;
+        yFruits[i] = -1;
+        putFruit();
+      }
     }
   }
 
@@ -771,17 +778,30 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  public int closestFruitIndex() {
+    int shortestDistance = WIDTH + HEIGHT;
+    int outIndex = 0;
+    for (int i = 0; i < ELEMENTS; i++) {
+      int distance = Math.abs(aiXCoord[0] - xFruits[i]) + Math.abs(aiYCoord[0] - yFruits[i]);
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
+        outIndex = i;
+      }
+    }
+    return outIndex;
+  }
+
   @Override
   public void actionPerformed(ActionEvent e) {
     if (isRunning) {
-      // move();
+      move();
       moveFrog();
       aiMove();
-      // checkFruit();
-      // checkFrog();
+      checkFruit();
+      checkFrog();
       aiCheckFruit();
       aiCheckFrog();
-      // checkCollisions();
+      checkCollisions();
       aiCheckCollisions();
     }
     repaint();
