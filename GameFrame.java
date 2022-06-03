@@ -7,8 +7,9 @@ public class GameFrame extends JFrame implements ActionListener {
 
   GameFrame() {
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    this.setSize(400, 300);
+    this.setSize(600, 500);
     this.setLayout(null);
+    
     resetButton = new JButton("Reset");
     resetButton.setSize(100, 50);
     resetButton.setLocation(0, 0);
