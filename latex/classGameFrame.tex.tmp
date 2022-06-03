@@ -1,0 +1,27 @@
+\hypertarget{classGameFrame}{}\doxysection{Game\+Frame Class Reference}
+\label{classGameFrame}\index{GameFrame@{GameFrame}}
+
+
+Inheritance diagram for Game\+Frame\+:
+% FIG 0
+
+
+Collaboration diagram for Game\+Frame\+:
+% FIG 1
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classGameFrame_a2e375a5c5f756ecded4ce520c893a89b}\label{classGameFrame_a2e375a5c5f756ecded4ce520c893a89b}} 
+void \mbox{\hyperlink{classGameFrame_a2e375a5c5f756ecded4ce520c893a89b}{read\+Highest\+Score}} ()
+\begin{DoxyCompactList}\small\item\em wczytuje z pliku informację o najlepszym wyniku \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classGameFrame_a93747741249827efaadf8fda41a43025}\label{classGameFrame_a93747741249827efaadf8fda41a43025}} 
+void \mbox{\hyperlink{classGameFrame_a93747741249827efaadf8fda41a43025}{action\+Performed}} (Action\+Event e)
+\begin{DoxyCompactList}\small\item\em restartuje grę \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Zawiera wszystkie składowe aplikacji, pole gry, przycisk restartu, informację o najlepszym wyniku 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+Game\+Frame.\+java\end{DoxyCompactItemize}

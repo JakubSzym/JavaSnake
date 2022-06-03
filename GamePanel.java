@@ -7,16 +7,19 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.Random;
 
+/**
+ * @class GamePanel
+ * Plansza do gry
+ */
 
 public class GamePanel extends JPanel implements ActionListener {
-
   static final int WIDTH = 500;
   static final int HEIGHT = 500;
   static final int UNIT_SIZE = 10;
   static final int ELEMENTS = 5;
   static final int OBSTACLES_NUM = 8;
   static final int GAME_UNITS = (WIDTH * HEIGHT) / UNIT_SIZE;
-  static final int DELAY = 65;
+  static final int DELAY = 60;
   static final String DATAFILE = "record.dat";
 
   final int xCoord[] = new int[GAME_UNITS];
@@ -78,6 +81,13 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   };
 
+  /**
+  * @brief konstruktor - inicjalizuje obsługę klawiszy oraz współrzędne węża AI
+  * Ustawia początkowe współrzędne owoców
+  * Wczytuje z pliku informację o najlepszym wyniku
+  * Wywołuje metodę start()
+  */
+
   GamePanel() {
     random = new Random();
 
@@ -121,6 +131,11 @@ public class GamePanel extends JPanel implements ActionListener {
     start();
   }
 
+  /**
+   * @brief Ustawia początkowe położenie obiektów na planszy
+   * Inicjalizuje timer, na którym oparte jest działanie programu
+   */
+
   public void start() {
     putFrog();
     putObstacles();
@@ -130,10 +145,19 @@ public class GamePanel extends JPanel implements ActionListener {
     timer.start();
   }
 
+  /*
+   * @brief metoda odpowiedzialna za tworzenie grafiki
+   */
+
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     draw(g);
   }
+
+  /**
+   * @brief rysuje w odpowiedni sposób wszystkie obiekty
+   * @param g
+   */
 
   public void draw(Graphics g) {
     if (isRunning) {
@@ -214,6 +238,9 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief obsługuje ruchy użytkownika
+   */
   public void move() {
     for (int i = segments; i > 0; i--) {
       xCoord[i] = xCoord[i - 1];
@@ -236,6 +263,9 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief obsługuje ruch żaby
+   */
   public void moveFrog() {
     if (xFrog == WIDTH - UNIT_SIZE && yFrog == 0) {
       switch (frogDirection) {
@@ -396,6 +426,9 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief obsługuje ruch drugiego węża, sterowanego automatycznie
+   */
   public void aiMove() {
 
     if (aiXCoord[0] == WIDTH - UNIT_SIZE && aiYCoord[0] == 0) {
@@ -544,6 +577,10 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief generuje losowe współrzędne przeszkód
+   */
+
   public void putObstacles() {
     obstaclesX = new int[OBSTACLES_NUM][ELEMENTS];
     obstaclesY = new int[OBSTACLES_NUM][ELEMENTS];
@@ -563,6 +600,10 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief generuje losowe współrzędne owoców
+   */
+  
   public void putFruit() {
     for (int i = 0; i < ELEMENTS; i++) {
 
@@ -580,6 +621,10 @@ public class GamePanel extends JPanel implements ActionListener {
       }
     }    
   }
+
+  /**
+   * @brief generuje losowe współrzędne żaby
+   */
 
   public void putFrog() {
     xFrog = WIDTH / 2;
@@ -600,6 +645,10 @@ public class GamePanel extends JPanel implements ActionListener {
         break;
     }
   }
+
+  /**
+   * @brief sprawdza, czy wąż gracza zjadł jakiś owoc
+   */
 
   public void checkFruit() {
     for (int i = 0; i < ELEMENTS; i++) {
@@ -633,6 +682,10 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief sprawdza, czy wąż AI zjadł jakiś owoc
+   */
+
   public void aiCheckFruit() {
     for (int i = 0; i < ELEMENTS; i++) {
       if (aiXCoord[0] == xFruits[i] && aiYCoord[0] == yFruits[i]) {
@@ -645,6 +698,10 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief sprawdza, czy wąż gracza zjadł żabę
+   */
+
   public void checkFrog() {
     if (xCoord[0] == xFrog && yCoord[0] == yFrog) {
       segments++;
@@ -653,6 +710,10 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief sprawdza, czy wąż AI zjadł żabę
+   */
+
   public void aiCheckFrog() {
     if (aiXCoord[0] == xFrog && aiYCoord[0] == yFrog) {
       aiSegments++;
@@ -660,6 +721,10 @@ public class GamePanel extends JPanel implements ActionListener {
       putFrog();
     }
   }
+
+  /**
+   * @brief sprawdza, czy nastąpiła kolizja węża gracza z jakimś obiektem
+   */
 
   public void checkCollisions() {
     for (int i = segments; i > 0; i--) {
@@ -701,6 +766,10 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief sprawdza, czy nastąpiła kolizja węża AI z jakimś obiektem
+   */
+
   public void aiCheckCollisions() {
     for (int i = aiSegments; i > 0; i--) {
       if (aiXCoord[0] == aiXCoord[i] && aiYCoord[0] == aiYCoord[i]) {
@@ -734,6 +803,10 @@ public class GamePanel extends JPanel implements ActionListener {
       timer.stop();
     }
   }
+
+  /**
+   * @brief  obsługuje zakończenie gry
+   */
 
   public void gameOver(Graphics g) {
     this.setFocusable(false);
@@ -778,6 +851,11 @@ public class GamePanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * @brief Wyznacza współrzędne najbliższego owocu dla węża AI
+   * @return Zwraca indeks owocu, który jest najbliżej węża AI
+   */
+
   public int closestFruitIndex() {
     int shortestDistance = WIDTH + HEIGHT;
     int outIndex = 0;
@@ -791,6 +869,10 @@ public class GamePanel extends JPanel implements ActionListener {
     return outIndex;
   }
 
+  /**
+   * @brief reaguje na tyknięcie timera
+   * wywołuje metody obsługujące ruchome i nieruchome obiekty na planszy
+   */
   @Override
   public void actionPerformed(ActionEvent e) {
     if (isRunning) {
